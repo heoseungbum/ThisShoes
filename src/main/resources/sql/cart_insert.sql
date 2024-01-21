@@ -1,0 +1,1 @@
+insert into cart(cart_no,u_id,p_no,cart_qty) values(cart_cart_no_seq.nextval,'a',1,1);

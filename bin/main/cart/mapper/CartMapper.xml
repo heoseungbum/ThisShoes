@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cart.mapper.CartMapper">
+	<!-- ############################## resultMap정의 예시############################# -->
+	<resultMap id="cartResultMap" type="cart.Cart" autoMapping="true">
+			<id column="cart_no" property="cart_no"/>
+			<result column="u_id" property="u_id"/>
+			<result column="cart_qty" property="cart_qty"/>
+			
+			<association property="product" autoMapping="true" javaType="product.domain.Product">
+				<id column="p_no" property="p_no"></id>
+				<result column="p_name" property="p_name"/>
+				<result column="p_price" property="p_price"/>
+				<result column="p_image" property="p_image"/>
+				<result column="p_detail" property="p_detail"/>
+				<result column="p_brand" property="p_brand"/>
+				<result column="p_click_count" property="p_click_count"/>
+				<result column="p_amount" property="p_amount"/>
+				<result column="p_size" property="p_size"/>
+			</association>
+	</resultMap>
+
+	<insert id="insert" parameterType="cart.Cart">
+ 		insert into cart(cart_no,u_id,p_no,cart_qty) values(cart_cart_no_seq.nextval,#{u_id},#{product.p_no},#{cart_qty})
+	</insert>
+	
+	<update id="update_qty" parameterType="cart.Cart">
+		update cart set cart_qty=#{cart_qty} where u_id=#{u_id} and cart_no=#{cart_no}
+	</update>
+	
+	<update id="update_size" parameterType="cart.Cart">
+		update cart set cart_size=#{cart_size} where u_id=#{u_id} and cart_no=#{cart_no}
+	</update>
+	
+	<update id="update_byProductNo" parameterType="cart.Cart">
+		update cart set cart_qty=#{cart_qty} where u_id=#{u_id} and p_no=#{product.p_no}
+	</update>
+	
+	<delete id="delete" parameterType="cart.Cart">
+		delete from cart where u_id=#{u_id} and cart_no=#{cart_no}
+	</delete>
+	
+	<select id="count_product_by_userId" parameterType="cart.Cart" resultType="int">
+		select count(*) from cart c join userInfo u on c.u_id=u.u_id where u.u_id=#{u_id} and c.p_no=#{product.p_no}
+	</select>
+	
+	<select id="count_productWithSize_by_userId" parameterType="cart.Cart" resultType="int">
+		select count(*) from product p join (select count(*) from cart c join userInfo u on c.u_id=u.u_id where u.u_id=#{u_id}) j on p.p_size=#{product.p_size} and p.p_no=#{product.p_no}
+	</select>
+	
+	<select id="cartProductAll" parameterType="String" resultMap="cartResultMap">
+		select * from cart c join product p on c.p_no=p.p_no where c.u_id=#{u_id}
+	</select>
+	
+	<select id="findCartbyNo" parameterType="cart.Cart" resultMap="cartResultMap">
+		select * from cart where u_id=#{u_id} and cart_no=#{cart_no}
+	</select>
+</mapper>

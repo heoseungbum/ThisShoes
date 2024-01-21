@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="user.UserMapper">
+	
+	<resultMap id="userResultMap" type="user.User" autoMapping="true">
+		<id column="u_id" property="u_id"/>
+	</resultMap>
+	
+    <insert id="insert" parameterType="user.User">
+        insert into userinfo(u_id, u_pass, u_name, u_email, u_age, u_phone, u_address)
+        values(#{u_id},#{u_pass},#{u_name},#{u_email},#{u_age},#{u_phone},#{u_address})
+    </insert>
+    
+    <update id="update" parameterType="user.User">
+        update userinfo set
+        u_id=#{u_id}, u_pass=#{u_pass}, u_name=#{u_name}, u_email=#{u_email},
+        u_age=#{u_age}, u_phone=#{u_phone}, u_address=#{u_address}
+        where u_id=#{u_id}
+    </update>
+    
+    <delete id="delete" parameterType="java.lang.String">
+        delete from userinfo where u_id=#{userId}  
+    </delete>
+    
+    <select id="findUser" resultType="user.User" parameterType="java.lang.String">
+        select * from userinfo where u_id=#{userId}
+    </select>
+    
+    <select id="findUserList" resultType="user.User">
+        select * from userinfo
+    </select>
+    
+    <select id="countByUserId" resultType="int" parameterType="java.lang.String">
+        select count(*) cnt from userinfo where u_id=#{userId}
+    </select>
+    
+      <!-- 추가: userinfo 테이블에서 u_id를 조회하는 쿼리 -->
+  <select id="findUserIdByNamePhone" parameterType="user.User" resultType="java.lang.String" >
+    	select u_id from userinfo where u_name=#{u_name} and u_phone=#{u_phone}
+  </select>
+		
+	   <!-- 추가: userinfo 테이블에서 u_pass를 조회하는 쿼리 -->
+  <select id="findUserPassByNamePhone" parameterType="user.User" resultType="java.lang.String" >
+    	select u_pass from userinfo where u_id=#{u_id} and u_phone=#{u_phone}
+  </select>	
+		
+</mapper>

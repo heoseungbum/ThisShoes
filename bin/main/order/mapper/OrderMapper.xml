@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="order.mapper.OrderMapper">
+
+	<resultMap id="OrderWithItemsResultMap" type="order.Order"
+		autoMapping="true">
+		<id property="o_no" column="o_no" />
+		<collection property="orderItemList" autoMapping="true" ofType="order.OrderItem">
+			<id column="oi_no" property="oi_no" />
+			<association property="product" autoMapping="true" javaType="product.domain.Product">
+				<id column="p_no" property="p_no" />
+			</association>
+		</collection>
+	</resultMap>
+
+	<delete id="deleteU_id" parameterType="string">
+		delete from orders where
+		u_id = #{u_id}
+	</delete>
+
+	<delete id="delete" parameterType="order.Order">
+		delete from orders where o_no = #{o_no} and u_id = #{u_id}
+	</delete>
+
+	<insert id="insertOrder" parameterType="order.Order">
+		<selectKey keyProperty="o_no" order="BEFORE"
+			resultType="int">
+			select orders_o_no_SEQ.nextval from dual
+		</selectKey>
+		insert into
+		orders(o_no,o_desc,o_date,o_price,o_address,u_id) values
+		(#{o_no},#{o_desc},sysdate,#{o_price},#{o_address},#{u_id})
+	</insert>
+
+	<insert id="insertOrderItem" parameterType="order.OrderItem">
+		insert into
+		order_item(oi_no,oi_qty,o_no,p_no)
+		values(order_item_oi_no_SEQ.nextval,#{oi_qty},#{o_no},#{p_no})
+	</insert>
+
+	<select id="selectByUserId" parameterType="order.Order" resultMap="OrderWithItemsResultMap">
+		select * from orders o join (select * from order_item oi join product p on oi.p_no=p.p_no) j 
+		on o.o_no=j.o_no where o.u_id=#{u_id}
+	</select>
+
+	<select id="selectOrderWithOrderItemsByOrderNo"
+		resultMap="OrderWithItemsResultMap" parameterType="int">
+		select o.* , p.*
+		,oi.* from orders
+		o join order_item oi on o.o_no = oi.o_no join product
+		p
+		on oi.p_no =
+		p.p_no where o.o_no = #{o.o_no}
+	</select>
+
+	<select id="selectOrderWithOrderItemsByUserId"
+		resultMap="OrderWithItemsResultMap" parameterType="String">
+		select * from orders
+		o join order_item oi on o.o_no = oi.o_no join product p
+		on oi.p_no =
+		p.p_no where o.u_id = #{o.u_id}
+	</select>
+
+
+	<!-- <select id="getOrderItemsByOrder" resultType="order.Order"> SELECT 
+		* FROM order_item WHERE o_no = #{o_no} </select> -->
+</mapper>
+

@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="product.mapper.ProductMapper">
+	<!-- ############################## resultMap정의 예시############################# -->
+	<resultMap id="productResultMap"
+		type="product.domain.Product" autoMapping="true">
+		<id column="p_no" property="p_no" />
+		<id column="p_name" property="p_name" />
+		<id column="p_price" property="p_price" />
+		<id column="p_image" property="p_image" />
+		<id column="p_detail" property="p_detail" />
+		<id column="p_brand" property="p_brand" />
+		<id column="p_click_count" property="p_click_count" />
+		<id column="p_amount" property="p_amount" />
+		<id column="p_size" property="p_size" />
+
+	</resultMap>
+
+	<select id="productSelectAll" resultMap="productResultMap">
+		select * from product
+	</select>
+
+	<!-- 일부 단어 검색으로 제품명들 출력. -->
+	<select id="searchProductByName" parameterType="java.lang.String"
+		resultType="product.domain.Product">
+		SELECT *
+		From Product
+		WHERE p_name LIKE '%' ||
+		#{keyword} || '%'
+	</select>
+
+	<!--품절된 상품확인하기 -->
+	<select id="soldOutProducts" parameterType="int"
+		resultMap="productResultMap">
+		SELECT p.* FROM product p left outer JOIN
+		order_item o ON p.p_no = o.p_no
+		WHERE p.p_amount=0 and p.p_size=#{p_size}
+	</select>
+
+	<select id="selectProductByNo" parameterType="int"
+		resultType="product.domain.Product">
+		select *
+		from product
+		where p_no = #{p_no}
+	</select>
+
+	<select id="selectProductByBrand"
+		parameterType="java.lang.String" resultType="product.domain.Product">
+		select *
+		from product
+		where
+		p_brand=#{p_brand}
+	</select>
+
+
+	<!-- 높은 가격 순서대로 제품 조회 -->
+	<select id="findAllByPriceHigh" resultMap="productResultMap">
+		SELECT * FROM product
+		ORDER BY p_price DESC
+	</select>
+
+	<!-- 브랜드별 가격 높은순 정렬 -->
+	<select id="findBrandPriceHigh" parameterType="java.lang.String"
+		resultType="product.domain.Product">
+		SELECT * FROM PRODUCT
+		WHERE p_brand = #{p_brand}
+		ORDER BY
+		p_price DESC
+	</select>
+
+
+	<!-- 상품 낮은 가격순으로 정렬(내림차순) -->
+	<select id="findAllByPriceLow" resultMap="productResultMap">
+		SELECT * FROM PRODUCT
+		ORDER BY p_price ASC
+	</select>
+	<!-- 브랜드별 가격 낮은 정렬 -->
+	<select id="findBrandPriceLow" parameterType="java.lang.String"
+		resultType="product.domain.Product">
+		SELECT * FROM PRODUCT
+		WHERE p_brand = #{p_brand}
+		ORDER BY
+		p_price ASC
+	</select>
+
+	<!-- 상품 조회수 높은 순으로 출력(인기순) -->
+	<select id="findAllByClickCountHigh"
+		resultMap="productResultMap">
+		SELECT * FROM product
+		ORDER BY p_click_count DESC
+	</select>
+	<!-- 브랜드별 조회수 높은 순으로 출력(인기순) -->
+	<select id="findBrandClickCountHigh"
+		resultMap="productResultMap">
+		SELECT * FROM product
+		ORDER BY p_click_count DESC
+	</select>
+	
+	<!--메인페이지에 6개 상품 띄우는 거  -->
+<select id="getTwoProductsPerBrand" resultType="product.domain.Product">
+    <![CDATA[
+    SELECT *
+    FROM (
+        SELECT 
+            p.*,
+            ROW_NUMBER() OVER (PARTITION BY p_brand ORDER BY DBMS_RANDOM.VALUE) AS rn
+        FROM product p where p_size=230
+    ) ranked
+    WHERE rn <= 2
+    ]]>
+</select>
+</mapper>
